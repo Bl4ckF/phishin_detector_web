@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detector de Phishing</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Detector de Phishing</h1>
+        <form id="urlForm">
+            <label for="url">Insira a URL para verificar:</label>
+            <input type="text" id="url" name="url" placeholder="https://exemplo.com" required>
+            <button type="submit">Verificar</button>
+        </form>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        document.getElementById("urlForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const url = document.getElementById("url").value;
+            const resultDiv = document.getElementById("result");
+
+            try {
+                const response = await fetch("/check-url", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ url }),
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    resultDiv.innerHTML = `<p class="error">${data.error}</p>`;
+                } else if (data.is_suspicious) {
+                    resultDiv.innerHTML = `<p class="warning">⚠️ ATENÇÃO: URL suspeita! Motivo: ${data.reason}</p>`;
+                } else {
+                    resultDiv.innerHTML = `<p class="success">✅ URL segura.</p>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="error">Erro ao verificar a URL.</p>`;
+            }
+        });
+    </script>
+</body>
+</html>
